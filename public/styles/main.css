@@ -38,6 +38,8 @@ header h1 {
   grid-template-columns: 1fr 2fr;
   gap: 30px;
   margin-bottom: 30px;
+  flex: 1;
+  align-items: stretch;
 }
 
 #qr-section {
@@ -52,6 +54,10 @@ header h1 {
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .qr-container h2 {
@@ -74,10 +80,16 @@ header h1 {
   display: none;
 }
 
+#lobby-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 20px;
+}
+
 #players-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 #players-list {
@@ -86,12 +98,26 @@ header h1 {
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 #players-list h3 {
   color: #667eea;
   margin-bottom: 20px;
   text-align: center;
+}
+
+#players-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+#lobby-controls {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
 }
 
 #players-container {
@@ -209,7 +235,7 @@ header h1 {
   background: rgba(255, 255, 255, 0.5);
   border-radius: 15px;
   position: relative;
-  margin: 0 0 0 10px;
+  margin: 0 0 0 5px;
   overflow: visible;
   border: 2px solid rgba(0,0,0,0.1);
 }
@@ -241,7 +267,8 @@ header h1 {
   gap: 20px;
 }
 
-#game-controls {
+#game-controls,
+#lobby-controls {
   display: flex;
   justify-content: center;
   gap: 20px;
@@ -321,6 +348,10 @@ header h1 {
   
   #qr-section {
     justify-content: center;
+  }
+  
+  .qr-container {
+    height: auto;
   }
 }
 
