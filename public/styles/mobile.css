@@ -113,6 +113,8 @@ h1 {
   align-items: center;
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   transition: transform 0.1s, box-shadow 0.1s;
   border: 6px solid white;
@@ -128,6 +130,9 @@ h1 {
   font-weight: 800;
   color: white;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 #tap-count {
@@ -140,6 +145,147 @@ h1 {
   font-size: 1.5rem;
   margin-bottom: 20px;
   font-weight: 600;
+}
+
+.mode-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.mode-btn {
+  background: white;
+  border: 3px solid transparent;
+  border-radius: 15px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.mode-btn:active {
+  transform: scale(0.95);
+}
+
+.mode-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+}
+
+.mode-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 5px;
+}
+
+.mode-desc {
+  font-size: 1rem;
+  color: #666;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+#betting-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.betting-card {
+  background: white;
+  border: 3px solid #ddd;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.betting-card:active {
+  transform: scale(0.95);
+}
+
+.betting-card.selected {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.horse-emoji {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.horse-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.horse-rider {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+#confirm-bet-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#bet-info,
+#bet-status {
+  margin-bottom: 30px;
+}
+
+.bet-label {
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+#bet-horse-display,
+#race-bet-display {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  display: inline-block;
+}
+
+#bet-horse-display .horse-emoji,
+#race-bet-display .horse-emoji {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+#bet-horse-display .horse-name,
+#race-bet-display .horse-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+#bet-result-title {
+  margin-bottom: 20px;
+}
+
+#bet-result-message {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 375px) {

@@ -8,34 +8,53 @@
 </head>
 <body>
   <div id="app">
-    <header>
-      <h1>🏇 Horse Race</h1>
-      <div id="game-status">Waiting for players...</div>
-    </header>
+    <div id="lobby-screen">
+      <header>
+        <h1>🏇 Horse Race</h1>
+        <div id="game-status">Waiting for players...</div>
+      </header>
 
-    <div id="qr-section">
-      <div class="qr-container">
-        <h2>Scan to Join!</h2>
-        <div id="qr-code"></div>
-        <p id="mobile-url"></p>
+      <div id="qr-section">
+        <div class="qr-container">
+          <h2>Scan to Join!</h2>
+          <div id="qr-code"></div>
+          <p id="mobile-url"></p>
+        </div>
+      </div>
+
+      <div id="players-list">
+        <h3>Players Ready:</h3>
+        <div id="players-container"></div>
+      </div>
+
+      <div id="controls">
+        <button id="go-to-game-btn" class="btn btn-primary">Go to Game</button>
       </div>
     </div>
 
-    <div id="race-track">
-      <div id="finish-line"></div>
-      <div id="horses-container"></div>
-    </div>
+    <div id="game-screen" class="hidden">
+      <header>
+        <h1>🏇 Horse Race</h1>
+        <div id="race-status">Ready to race!</div>
+      </header>
 
-    <div id="controls">
-      <button id="start-btn" class="btn btn-primary">Start Race</button>
-      <button id="reset-btn" class="btn btn-secondary">Reset Game</button>
-    </div>
+      <div id="race-track">
+        <div id="finish-line"></div>
+        <div id="horses-container"></div>
+      </div>
 
-    <div id="winner-modal" class="modal hidden">
-      <div class="modal-content">
-        <h2>🏆 Winner!</h2>
-        <p id="winner-name"></p>
-        <button id="close-modal-btn" class="btn btn-primary">Close</button>
+      <div id="game-controls">
+        <button id="start-btn" class="btn btn-primary">Start Race</button>
+        <button id="reset-btn" class="btn btn-secondary">Reset Game</button>
+        <button id="back-to-lobby-btn" class="btn btn-secondary">Back to Lobby</button>
+      </div>
+
+      <div id="winner-modal" class="modal hidden">
+        <div class="modal-content">
+          <h2>🏆 Winner!</h2>
+          <p id="winner-name"></p>
+          <button id="close-modal-btn" class="btn btn-primary">Close</button>
+        </div>
       </div>
     </div>
   </div>

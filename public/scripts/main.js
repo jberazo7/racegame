@@ -1,16 +1,24 @@
 const socket = io();
 
+const lobbyScreen = document.getElementById('lobby-screen');
+const gameScreen = document.getElementById('game-screen');
 const qrCodeEl = document.getElementById('qr-code');
 const mobileUrlEl = document.getElementById('mobile-url');
 const gameStatusEl = document.getElementById('game-status');
+const raceStatusEl = document.getElementById('race-status');
+const playersContainer = document.getElementById('players-container');
 const horsesContainer = document.getElementById('horses-container');
+const goToGameBtn = document.getElementById('go-to-game-btn');
 const startBtn = document.getElementById('start-btn');
 const resetBtn = document.getElementById('reset-btn');
+const backToLobbyBtn = document.getElementById('back-to-lobby-btn');
 const winnerModal = document.getElementById('winner-modal');
 const winnerNameEl = document.getElementById('winner-name');
 const closeModalBtn = document.getElementById('close-modal-btn');
 
 let players = [];
+let bettors = [];
+let currentScreen = 'lobby';
 
 // Load QR code
 fetch('/qr')
@@ -23,7 +31,14 @@ fetch('/qr')
 // Socket event handlers
 socket.on('players-update', (updatedPlayers) => {
   players = updatedPlayers;
+  updateLobbyPlayers();
   updatePlayersDisplay();
+  updateGameStatus();
+});
+
+socket.on('bettors-update', (updatedBettors) => {
+  bettors = updatedBettors;
+  updateLobbyPlayers();
   updateGameStatus();
 });
 
@@ -36,19 +51,19 @@ socket.on('position-update', ({ playerId, position }) => {
 });
 
 socket.on('race-started', () => {
-  gameStatusEl.textContent = 'Race in progress! 🏁';
+  raceStatusEl.textContent = 'Race in progress! 🏁';
   startBtn.disabled = true;
 });
 
 socket.on('race-finished', ({ winner }) => {
-  gameStatusEl.textContent = `Race finished! Winner: ${winner.name} 🏆`;
+  raceStatusEl.textContent = `Race finished! Winner: ${winner.name} 🏆`;
   winnerNameEl.textContent = winner.name;
   winnerModal.classList.remove('hidden');
   startBtn.disabled = false;
 });
 
 socket.on('game-reset', () => {
-  gameStatusEl.textContent = 'Waiting for players...';
+  raceStatusEl.textContent = 'Ready to race!';
   startBtn.disabled = false;
   winnerModal.classList.add('hidden');
   players.forEach(player => player.position = 0);
@@ -56,17 +71,53 @@ socket.on('game-reset', () => {
 });
 
 // UI functions
+function updateLobbyPlayers() {
+  playersContainer.innerHTML = '';
+  
+  const totalParticipants = players.length + bettors.length;
+  
+  if (totalParticipants === 0) {
+    playersContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No players yet</p>';
+    return;
+  }
+  
+  // Show racers
+  players.forEach(player => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.innerHTML = `
+      <div class="player-color-dot" style="background-color: ${player.color}"></div>
+      <div class="player-card-name">${player.name} 🏇</div>
+    `;
+    playersContainer.appendChild(card);
+  });
+  
+  // Show bettors
+  bettors.forEach(bettor => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.innerHTML = `
+      <div class="player-color-dot" style="background: linear-gradient(135deg, #FFD700, #FFA500)">💰</div>
+      <div class="player-card-name">${bettor.name}</div>
+    `;
+    playersContainer.appendChild(card);
+  });
+}
+
 function updatePlayersDisplay() {
+  if (currentScreen !== 'game') return;
+  
   horsesContainer.innerHTML = '';
   
   if (players.length === 0) {
-    horsesContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No players yet. Scan the QR code to join!</p>';
+    horsesContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No players yet. Go back to lobby!</p>';
     return;
   }
   
   players.forEach(player => {
     const lane = document.createElement('div');
     lane.className = 'horse-lane';
+    lane.style.backgroundColor = lightenColor(player.color, 0.85);
     lane.innerHTML = `
       <div class="horse-info" style="color: ${player.color}">
         ${player.name}
@@ -79,6 +130,14 @@ function updatePlayersDisplay() {
   });
 }
 
+function lightenColor(color, amount) {
+  const num = parseInt(color.replace('#', ''), 16);
+  const r = Math.min(255, Math.floor((num >> 16) + (255 - (num >> 16)) * amount));
+  const g = Math.min(255, Math.floor(((num >> 8) & 0x00FF) + (255 - ((num >> 8) & 0x00FF)) * amount));
+  const b = Math.min(255, Math.floor((num & 0x0000FF) + (255 - (num & 0x0000FF)) * amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
 function updateHorsePosition(playerId, position) {
   const horseEl = document.getElementById(`horse-${playerId}`);
   if (horseEl) {
@@ -88,14 +147,31 @@ function updateHorsePosition(playerId, position) {
 }
 
 function updateGameStatus() {
-  if (players.length === 0) {
+  const totalParticipants = players.length + bettors.length;
+  if (totalParticipants === 0) {
     gameStatusEl.textContent = 'Waiting for players...';
   } else {
-    gameStatusEl.textContent = `${players.length} player${players.length !== 1 ? 's' : ''} ready`;
+    const parts = [];
+    if (players.length > 0) parts.push(`${players.length} racer${players.length !== 1 ? 's' : ''}`);
+    if (bettors.length > 0) parts.push(`${bettors.length} bettor${bettors.length !== 1 ? 's' : ''}`);
+    gameStatusEl.textContent = parts.join(', ') + ' ready';
   }
 }
 
 // Button handlers
+goToGameBtn.addEventListener('click', () => {
+  currentScreen = 'game';
+  lobbyScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+  updatePlayersDisplay();
+});
+
+backToLobbyBtn.addEventListener('click', () => {
+  currentScreen = 'lobby';
+  gameScreen.classList.add('hidden');
+  lobbyScreen.classList.remove('hidden');
+});
+
 startBtn.addEventListener('click', () => {
   if (players.length > 0) {
     socket.emit('start-race');

@@ -62,75 +62,147 @@ header h1 {
   font-size: 0.9rem;
 }
 
+#lobby-screen.hidden,
+#game-screen.hidden {
+  display: none;
+}
+
+#players-list {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+#players-list h3 {
+  color: #667eea;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#players-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #f8f9fa;
+}
+
+.player-color-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.player-card-name {
+  font-weight: 600;
+  color: #333;
+}
+
 #race-track {
   background: #fff;
   border-radius: 20px;
-  padding: 40px 20px;
+  padding: 20px;
   margin-bottom: 30px;
+  height: calc(100vh - 250px);
   min-height: 400px;
   position: relative;
-  overflow-y: auto;
-  max-height: 600px;
+  overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
 #finish-line {
   position: absolute;
-  right: 40px;
-  top: 0;
-  bottom: 0;
-  width: 4px;
+  right: 60px;
+  top: 20px;
+  bottom: 20px;
+  width: 40px;
   background: repeating-linear-gradient(
-    0deg,
+    45deg,
     #000,
-    #000 20px,
-    #fff 20px,
-    #fff 40px
+    #000 15px,
+    #fff 15px,
+    #fff 30px
   );
+  border: 3px solid #000;
+  border-radius: 5px;
+  z-index: 10;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+#finish-line::before {
+  content: '🏁';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  z-index: 11;
 }
 
 #horses-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .horse-lane {
   display: flex;
   align-items: center;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 10px;
+  padding: 8px 15px;
+  border-radius: 8px;
   position: relative;
-  min-height: 60px;
+  flex: 1;
+  min-height: 40px;
+  max-height: calc((100vh - 300px) / 20);
+  margin-bottom: 2px;
 }
 
 .horse-info {
-  min-width: 150px;
+  min-width: 120px;
   font-weight: 600;
   color: #333;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .horse-track {
   flex: 1;
-  height: 40px;
-  background: #e9ecef;
-  border-radius: 20px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
   position: relative;
-  margin: 0 20px;
-  overflow: hidden;
+  margin: 0 15px;
+  overflow: visible;
+  border: 2px solid rgba(0,0,0,0.1);
 }
 
 .horse {
   position: absolute;
   left: 0;
   top: 50%;
-  transform: translateY(-50%);
-  font-size: 2rem;
+  transform: translateY(-50%) scaleX(-1);
+  font-size: 1.8rem;
   transition: left 0.1s ease-out;
+  z-index: 5;
+  filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
 }
 
-#controls {
+#controls,
+#game-controls {
   display: flex;
   justify-content: center;
   gap: 20px;

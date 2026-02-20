@@ -11,7 +11,30 @@
     <div id="join-screen" class="screen">
       <h1>🏇 Join Race</h1>
       <input type="text" id="player-name" placeholder="Enter your name" maxlength="20">
-      <button id="join-btn" class="btn btn-primary">Join Game</button>
+      <button id="join-btn" class="btn btn-primary">Continue</button>
+    </div>
+
+    <div id="mode-selection-screen" class="screen hidden">
+      <h1>Choose Your Mode</h1>
+      <div class="mode-buttons">
+        <button id="race-mode-btn" class="mode-btn">
+          <div class="mode-icon">🏇</div>
+          <div class="mode-title">Race</div>
+          <div class="mode-desc">Control a horse</div>
+        </button>
+        <button id="bet-mode-btn" class="mode-btn">
+          <div class="mode-icon">💰</div>
+          <div class="mode-title">Bet</div>
+          <div class="mode-desc">Pick a winner</div>
+        </button>
+      </div>
+    </div>
+
+    <div id="betting-screen" class="screen hidden">
+      <h1>Place Your Bet</h1>
+      <p class="subtitle">Choose a horse to win!</p>
+      <div id="betting-cards"></div>
+      <button id="confirm-bet-btn" class="btn btn-primary" disabled>Confirm Bet</button>
     </div>
 
     <div id="waiting-screen" class="screen hidden">
@@ -19,6 +42,15 @@
       <div id="player-info">
         <div id="player-color-indicator"></div>
         <p id="player-name-display"></p>
+      </div>
+      <p class="status">Waiting for race to start...</p>
+    </div>
+
+    <div id="betting-waiting-screen" class="screen hidden">
+      <h1>Bet Placed!</h1>
+      <div id="bet-info">
+        <p class="bet-label">You bet on:</p>
+        <div id="bet-horse-display"></div>
       </div>
       <p class="status">Waiting for race to start...</p>
     </div>
@@ -32,9 +64,24 @@
       </div>
     </div>
 
+    <div id="betting-race-screen" class="screen hidden">
+      <h1>Race in Progress!</h1>
+      <div id="bet-status">
+        <p class="bet-label">Your bet:</p>
+        <div id="race-bet-display"></div>
+      </div>
+      <p class="status">Watch the main screen!</p>
+    </div>
+
     <div id="finished-screen" class="screen hidden">
       <h1>Race Finished!</h1>
       <p id="result-message"></p>
+      <p class="status">Waiting for next race...</p>
+    </div>
+
+    <div id="bet-result-screen" class="screen hidden">
+      <h1 id="bet-result-title">Race Finished!</h1>
+      <p id="bet-result-message"></p>
       <p class="status">Waiting for next race...</p>
     </div>
   </div>

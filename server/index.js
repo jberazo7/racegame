@@ -28,6 +28,7 @@ const HOST = process.env.HOST || getLocalIP();
 
 // Game state
 const players = new Map();
+const bettors = new Map();
 let gameState = 'waiting'; // waiting, racing, finished
 let raceStartTime = null;
 
@@ -51,18 +52,47 @@ io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
   // Player joins
-  socket.on('join', (playerName) => {
-    const player = {
-      id: socket.id,
-      name: playerName,
-      position: 0,
-      color: generateColor(players.size)
-    };
-    players.set(socket.id, player);
-    
-    socket.emit('joined', { playerId: socket.id, color: player.color });
-    io.emit('players-update', Array.from(players.values()));
-    console.log(`Player joined: ${playerName}`);
+  socket.on('join', ({ name, mode }) => {
+    if (mode === 'racer') {
+      const player = {
+        id: socket.id,
+        name: name,
+        position: 0,
+        color: generateColor(players.size),
+        mode: 'racer'
+      };
+      players.set(socket.id, player);
+      
+      socket.emit('joined', { playerId: socket.id, color: player.color, mode: 'racer' });
+      io.emit('players-update', Array.from(players.values()));
+      console.log(`Racer joined: ${name}`);
+    } else {
+      const bettor = {
+        id: socket.id,
+        name: name,
+        mode: 'bettor',
+        bet: null
+      };
+      bettors.set(socket.id, bettor);
+      
+      socket.emit('joined', { playerId: socket.id, mode: 'bettor' });
+      io.emit('bettors-update', Array.from(bettors.values()));
+      console.log(`Bettor joined: ${name}`);
+    }
+  });
+
+  // Get racers list for betting
+  socket.on('get-racers', () => {
+    socket.emit('racers-list', Array.from(players.values()));
+  });
+
+  // Place bet
+  socket.on('place-bet', (racerId) => {
+    const bettor = bettors.get(socket.id);
+    if (bettor) {
+      bettor.bet = racerId;
+      console.log(`${bettor.name} bet on racer ${racerId}`);
+    }
   });
 
   // Player taps
@@ -107,8 +137,15 @@ io.on('connection', (socket) => {
 
   // Disconnect
   socket.on('disconnect', () => {
-    players.delete(socket.id);
-    io.emit('players-update', Array.from(players.values()));
+    const wasPlayer = players.delete(socket.id);
+    const wasBettor = bettors.delete(socket.id);
+    
+    if (wasPlayer) {
+      io.emit('players-update', Array.from(players.values()));
+    }
+    if (wasBettor) {
+      io.emit('bettors-update', Array.from(bettors.values()));
+    }
     console.log('Client disconnected:', socket.id);
   });
 });
