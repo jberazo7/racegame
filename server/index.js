@@ -87,11 +87,11 @@ io.on('connection', (socket) => {
   });
 
   // Place bet
-  socket.on('place-bet', (racerId) => {
+  socket.on('place-bet', (bets) => {
     const bettor = bettors.get(socket.id);
     if (bettor) {
-      bettor.bet = racerId;
-      console.log(`${bettor.name} bet on racer ${racerId}`);
+      bettor.bets = bets; // { top3: [id1, id2, id3], last: id }
+      console.log(`${bettor.name} placed bets:`, bets);
     }
   });
 
@@ -108,10 +108,21 @@ io.on('connection', (socket) => {
       const odds = calculateOdds();
       io.emit('odds-update', odds);
       
-      // Check for winner (finish line at position 100)
-      if (player.position >= 100 && gameState === 'racing') {
+      // Check for winner (finish line at position 300)
+      if (player.position >= 300 && gameState === 'racing') {
         gameState = 'finished';
-        io.emit('race-finished', { winner: player });
+        
+        // Calculate final results
+        const results = Array.from(players.values())
+          .sort((a, b) => b.position - a.position)
+          .map(p => ({ id: p.id, name: p.name, position: p.position }));
+        
+        const winner = results[0];
+        
+        // Calculate betting results
+        const betResults = calculateBettingResults(results);
+        
+        io.emit('race-finished', { winner, results, betResults });
       }
     }
   });
@@ -130,6 +141,79 @@ io.on('connection', (socket) => {
       position: Math.round((p.position / totalProgress) * 100),
       color: p.color
     })).sort((a, b) => b.position - a.position);
+  }
+
+  // Calculate betting results and distribute points
+  function calculateBettingResults(results) {
+    const TOTAL_POT = 100000;
+    const betResults = [];
+    
+    // Points per correct prediction
+    const POINTS_PER_TOP3 = 25000; // 25k per correct top 3 position
+    const POINTS_LAST = 25000; // 25k for correct last place
+    
+    // Track how many got each prediction right
+    const correctCounts = {
+      first: 0,
+      second: 0,
+      third: 0,
+      last: 0
+    };
+    
+    // First pass: count correct predictions
+    bettors.forEach(bettor => {
+      if (!bettor.bets) return;
+      
+      const { top3, last } = bettor.bets;
+      
+      if (top3 && top3.length > 0) {
+        if (top3[0] === results[0].id) correctCounts.first++;
+        if (top3.length > 1 && top3[1] === results[1]?.id) correctCounts.second++;
+        if (top3.length > 2 && top3[2] === results[2]?.id) correctCounts.third++;
+      }
+      
+      if (last === results[results.length - 1]?.id) correctCounts.last++;
+    });
+    
+    // Second pass: calculate points for each bettor
+    bettors.forEach(bettor => {
+      if (!bettor.bets) return;
+      
+      const { top3, last } = bettor.bets;
+      let totalPoints = 0;
+      let correctTop3 = 0;
+      let correctLast = false;
+      
+      if (top3 && top3.length > 0) {
+        if (top3[0] === results[0].id) {
+          totalPoints += correctCounts.first > 0 ? POINTS_PER_TOP3 / correctCounts.first : 0;
+          correctTop3++;
+        }
+        if (top3.length > 1 && top3[1] === results[1]?.id) {
+          totalPoints += correctCounts.second > 0 ? POINTS_PER_TOP3 / correctCounts.second : 0;
+          correctTop3++;
+        }
+        if (top3.length > 2 && top3[2] === results[2]?.id) {
+          totalPoints += correctCounts.third > 0 ? POINTS_PER_TOP3 / correctCounts.third : 0;
+          correctTop3++;
+        }
+      }
+      
+      if (last === results[results.length - 1]?.id) {
+        totalPoints += correctCounts.last > 0 ? POINTS_LAST / correctCounts.last : 0;
+        correctLast = true;
+      }
+      
+      betResults.push({
+        bettorId: bettor.id,
+        bettorName: bettor.name,
+        totalPoints: Math.round(totalPoints),
+        correctTop3,
+        correctLast
+      });
+    });
+    
+    return betResults;
   }
 
   // Start race

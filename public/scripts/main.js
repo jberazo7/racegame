@@ -55,9 +55,27 @@ socket.on('race-started', () => {
   startBtn.disabled = true;
 });
 
-socket.on('race-finished', ({ winner }) => {
+socket.on('race-finished', ({ winner, results, betResults }) => {
   raceStatusEl.textContent = `Race finished! Winner: ${winner.name} 🏆`;
-  winnerNameEl.textContent = winner.name;
+  
+  // Show final order
+  let resultsHtml = `<h2>🏆 ${winner.name}</h2><br><strong>Final Order:</strong><br>`;
+  results.forEach((r, i) => {
+    resultsHtml += `${i + 1}. ${r.name}<br>`;
+  });
+  
+  // Show betting results if any
+  if (betResults && betResults.length > 0) {
+    const winners = betResults.filter(b => b.totalPoints > 0);
+    if (winners.length > 0) {
+      resultsHtml += '<br><strong>Betting Winners:</strong><br>';
+      winners.forEach(w => {
+        resultsHtml += `${w.bettorName}: ${w.totalPoints.toLocaleString()} pts<br>`;
+      });
+    }
+  }
+  
+  winnerNameEl.innerHTML = resultsHtml;
   winnerModal.classList.remove('hidden');
   startBtn.disabled = false;
   
@@ -131,8 +149,13 @@ function updatePlayersDisplay() {
     const lane = document.createElement('div');
     lane.className = 'horse-lane';
     lane.style.backgroundColor = lightenColor(player.color, 0.85);
+    
+    // Calculate max name width based on longest name
+    const maxNameLength = Math.max(...players.map(p => p.name.length));
+    const nameWidth = Math.max(120, Math.min(250, maxNameLength * 15));
+    
     lane.innerHTML = `
-      <div class="horse-info" style="color: ${player.color}">
+      <div class="horse-info" style="color: ${player.color}; width: ${nameWidth}px;">
         ${player.name}
       </div>
       <div class="horse-track">
@@ -154,7 +177,7 @@ function lightenColor(color, amount) {
 function updateHorsePosition(playerId, position) {
   const horseEl = document.getElementById(`horse-${playerId}`);
   if (horseEl) {
-    const percentage = Math.min(position, 100);
+    const percentage = Math.min((position / 300) * 100, 100);
     horseEl.style.left = `${percentage}%`;
     
     // Galloping animation - tilt up briefly

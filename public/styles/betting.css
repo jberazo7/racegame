@@ -1,0 +1,102 @@
+.betting-section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.betting-instructions {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+#betting-cards-top3,
+#betting-cards-last {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 20px;
+  padding: 10px;
+}
+
+.betting-card {
+  position: relative;
+  background: white;
+  border: 3px solid #ddd;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.betting-card:active {
+  transform: scale(0.95);
+}
+
+.betting-card.selected {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.betting-card.selected-last {
+  border-color: #ff6b6b;
+  background: #ffebee;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.selection-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 35px;
+  height: 35px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.2rem;
+  border: 3px solid white;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+.selected-last .selection-badge {
+  background: #ff6b6b;
+}
+
+.bet-summary-section {
+  background: white;
+  color: #333;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.bet-breakdown {
+  background: rgba(76, 175, 80, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.bet-breakdown div {
+  margin: 5px 0;
+  font-size: 1.1rem;
+}

@@ -173,7 +173,7 @@ header h1 {
 .horse-lane {
   display: flex;
   align-items: center;
-  padding: 8px 15px;
+  padding: 5px 10px;
   border-radius: 8px;
   position: relative;
   flex: 1;
@@ -182,33 +182,42 @@ header h1 {
 }
 
 .horse-info {
-  min-width: 120px;
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 /* Dynamic name sizing based on number of players */
-.horses-container-small .horse-info { font-size: 1.8rem; }
-.horses-container-medium .horse-info { font-size: 1.2rem; }
-.horses-container-large .horse-info { font-size: 0.9rem; }
+.horses-container-small .horse-info { 
+  font-size: 2.5rem;
+  min-width: 200px;
+}
+.horses-container-medium .horse-info { 
+  font-size: 1.6rem;
+  min-width: 150px;
+}
+.horses-container-large .horse-info { 
+  font-size: 1.1rem;
+  min-width: 120px;
+}
 
 .horse-track {
   flex: 1;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 15px;
   position: relative;
-  margin: 0 15px;
+  margin: 0 0 0 10px;
   overflow: visible;
   border: 2px solid rgba(0,0,0,0.1);
 }
 
 /* Dynamic track sizing based on number of players */
-.horses-container-small .horse-track { height: 50px; }
-.horses-container-medium .horse-track { height: 35px; }
-.horses-container-large .horse-track { height: 25px; }
+.horses-container-small .horse-track { height: 60px; }
+.horses-container-medium .horse-track { height: 40px; }
+.horses-container-large .horse-track { height: 28px; }
 
 .horse {
   position: absolute;
@@ -222,9 +231,9 @@ header h1 {
 }
 
 /* Dynamic horse sizing based on number of players */
-.horses-container-small .horse { font-size: 3rem; }
-.horses-container-medium .horse { font-size: 2.2rem; }
-.horses-container-large .horse { font-size: 1.5rem; }
+.horses-container-small .horse { font-size: 4rem; }
+.horses-container-medium .horse { font-size: 2.8rem; }
+.horses-container-large .horse { font-size: 1.8rem; }
 
 #controls {
   display: flex;

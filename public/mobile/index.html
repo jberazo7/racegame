@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Horse Race - Controller</title>
   <link rel="stylesheet" href="/styles/mobile.css">
+  <link rel="stylesheet" href="/styles/betting.css">
 </head>
 <body>
   <div id="app">
     <div id="join-screen" class="screen">
       <h1>🏇 Join Race</h1>
       <input type="text" id="player-name" placeholder="Enter your name" maxlength="20">
-      <button id="join-btn" class="btn btn-primary">Continue</button>
+      <button id="join-btn" class="btn btn-primary">➡️ Continue</button>
     </div>
 
     <div id="mode-selection-screen" class="screen hidden">
@@ -31,10 +32,21 @@
     </div>
 
     <div id="betting-screen" class="screen hidden">
-      <h1>Place Your Bet</h1>
-      <p class="subtitle">Choose a horse to win! Prize: 100,000 points</p>
-      <div id="betting-cards"></div>
-      <button id="confirm-bet-btn" class="btn btn-primary" disabled>Confirm Bet</button>
+      <h1>Place Your Bets</h1>
+      <p class="subtitle">Pick the top 3 finishers in order and/or who finishes last!</p>
+      <p class="betting-instructions">Tap cards to select. Tap again to deselect. Prize pool: 100,000 points</p>
+      
+      <div class="betting-section">
+        <h3 class="section-title">🥇 Top 3 Finishers (in order)</h3>
+        <div id="betting-cards-top3"></div>
+      </div>
+      
+      <div class="betting-section">
+        <h3 class="section-title">🚫 Last Place</h3>
+        <div id="betting-cards-last"></div>
+      </div>
+      
+      <button id="confirm-bet-btn" class="btn btn-primary" disabled>✅ Confirm Bets</button>
     </div>
 
     <div id="waiting-screen" class="screen hidden">
@@ -47,10 +59,10 @@
     </div>
 
     <div id="betting-waiting-screen" class="screen hidden">
-      <h1>Bet Placed!</h1>
+      <h1>Bets Placed!</h1>
       <div id="bet-info">
-        <p class="bet-label">You bet on:</p>
-        <div id="bet-horse-display"></div>
+        <p class="bet-label">Your predictions:</p>
+        <div id="bet-summary-display"></div>
       </div>
       <p class="status">Waiting for race to start...</p>
     </div>
@@ -70,7 +82,7 @@
       <div style="margin-top: 200px;">
         <h1>Race in Progress!</h1>
         <div id="bet-status">
-          <p class="bet-label">Your bet:</p>
+          <p class="bet-label">Your predictions:</p>
           <div id="race-bet-display"></div>
         </div>
         <p class="status">Watch the main screen!</p>

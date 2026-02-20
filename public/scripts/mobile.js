@@ -14,11 +14,12 @@ const playerNameInput = document.getElementById('player-name');
 const joinBtn = document.getElementById('join-btn');
 const raceModeBtn = document.getElementById('race-mode-btn');
 const betModeBtn = document.getElementById('bet-mode-btn');
-const bettingCards = document.getElementById('betting-cards');
+const bettingCardsTop3 = document.getElementById('betting-cards-top3');
+const bettingCardsLast = document.getElementById('betting-cards-last');
 const confirmBetBtn = document.getElementById('confirm-bet-btn');
 const playerColorIndicator = document.getElementById('player-color-indicator');
 const playerNameDisplay = document.getElementById('player-name-display');
-const betHorseDisplay = document.getElementById('bet-horse-display');
+const betSummaryDisplay = document.getElementById('bet-summary-display');
 const raceBetDisplay = document.getElementById('race-bet-display');
 const tapButton = document.getElementById('tap-button');
 const tapCount = document.getElementById('tap-count');
@@ -32,7 +33,8 @@ let playerId = null;
 let playerColor = null;
 let playerName = '';
 let playerMode = null; // 'racer' or 'bettor'
-let selectedBet = null;
+let selectedTop3 = []; // Array of {id, name, color} in order
+let selectedLast = null; // {id, name, color}
 let taps = 0;
 let availableRacers = [];
 let currentOdds = [];
@@ -94,7 +96,7 @@ socket.on('race-started', () => {
   }
 });
 
-socket.on('race-finished', ({ winner }) => {
+socket.on('race-finished', ({ winner, results, betResults }) => {
   if (playerMode === 'racer') {
     const isWinner = winner.id === playerId;
     resultMessage.textContent = isWinner ? '🏆 You Won!' : `${winner.name} won!`;
@@ -107,19 +109,39 @@ socket.on('race-finished', ({ winner }) => {
     }
   } else {
     // Bettor result
-    const wonBet = selectedBet && selectedBet.id === winner.id;
-    betResultTitle.textContent = wonBet ? '🎉 You Won 100,000 Points!' : '😔 You Lost';
-    betResultTitle.style.color = wonBet ? '#FFD700' : '#fff';
-    betResultMessage.textContent = `${winner.name} won the race!`;
-    betResultMessage.style.color = wonBet ? '#4CAF50' : '#ff6b6b';
-    showScreen(betResultScreen);
+    const myResult = betResults.find(r => r.bettorId === playerId);
     
-    // Confetti for winning bet
-    if (wonBet) {
+    if (myResult && myResult.totalPoints > 0) {
+      betResultTitle.textContent = `🎉 You Won ${myResult.totalPoints.toLocaleString()} Points!`;
+      betResultTitle.style.color = '#FFD700';
+      
+      let breakdown = '<div class="bet-breakdown">';
+      if (myResult.correctTop3 > 0) {
+        breakdown += `<div>✅ ${myResult.correctTop3} correct in top 3</div>`;
+      }
+      if (myResult.correctLast) {
+        breakdown += `<div>✅ Last place correct!</div>`;
+      }
+      breakdown += '</div>';
+      
+      betResultMessage.innerHTML = `${breakdown}<br>Final Order:<br>${formatResults(results)}`;
+      betResultMessage.style.color = '#4CAF50';
+      
       setTimeout(() => createConfetti(document.body), 100);
+    } else {
+      betResultTitle.textContent = '😔 No Correct Predictions';
+      betResultTitle.style.color = '#fff';
+      betResultMessage.innerHTML = `Final Order:<br>${formatResults(results)}`;
+      betResultMessage.style.color = '#ff6b6b';
     }
+    
+    showScreen(betResultScreen);
   }
 });
+
+function formatResults(results) {
+  return results.map((r, i) => `${i + 1}. ${r.name}`).join('<br>');
+}
 
 socket.on('odds-update', (odds) => {
   currentOdds = odds;
@@ -178,7 +200,8 @@ function updateBettingCardsOdds() {
 
 socket.on('game-reset', () => {
   taps = 0;
-  selectedBet = null;
+  selectedTop3 = [];
+  selectedLast = null;
   if (playerMode === 'racer') {
     showScreen(waitingScreen);
   } else {
@@ -207,51 +230,149 @@ const horseImages = [
 ];
 
 function displayBettingCards(racers) {
-  bettingCards.innerHTML = '';
+  bettingCardsTop3.innerHTML = '';
+  bettingCardsLast.innerHTML = '';
   
   if (racers.length === 0) {
-    bettingCards.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No racers yet. Wait for players to join as racers!</p>';
+    bettingCardsTop3.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No racers yet. Wait for players to join as racers!</p>';
     return;
   }
   
   racers.forEach((racer, index) => {
-    const card = document.createElement('div');
-    card.className = 'betting-card';
-    const imageUrl = horseImages[index % horseImages.length];
-    card.innerHTML = `
-      <div class="horse-image" style="background-image: url('${imageUrl}')"></div>
-      <div class="horse-name">${racer.name}</div>
-      <div class="horse-color-indicator" style="background-color: ${racer.color}"></div>
-    `;
-    card.addEventListener('click', () => selectBet(racer, card));
-    bettingCards.appendChild(card);
+    // Top 3 cards
+    const cardTop3 = createBettingCard(racer, index, 'top3');
+    bettingCardsTop3.appendChild(cardTop3);
+    
+    // Last place cards
+    const cardLast = createBettingCard(racer, index, 'last');
+    bettingCardsLast.appendChild(cardLast);
   });
 }
 
-function selectBet(racer, cardElement) {
-  // Remove previous selection
-  document.querySelectorAll('.betting-card').forEach(c => c.classList.remove('selected'));
+function createBettingCard(racer, index, type) {
+  const card = document.createElement('div');
+  card.className = 'betting-card';
+  card.dataset.racerId = racer.id;
+  card.dataset.type = type;
+  const imageUrl = horseImages[index % horseImages.length];
   
-  // Select new
-  cardElement.classList.add('selected');
-  selectedBet = racer;
-  confirmBetBtn.disabled = false;
+  card.innerHTML = `
+    <div class="selection-badge"></div>
+    <div class="horse-image" style="background-image: url('${imageUrl}')"></div>
+    <div class="horse-name">${racer.name}</div>
+    <div class="horse-color-indicator" style="background-color: ${racer.color}"></div>
+  `;
+  
+  card.addEventListener('click', () => handleCardSelection(racer, card, type));
+  return card;
+}
+
+function handleCardSelection(racer, cardElement, type) {
+  if (type === 'top3') {
+    // Check if already selected
+    const existingIndex = selectedTop3.findIndex(s => s.id === racer.id);
+    
+    if (existingIndex !== -1) {
+      // Deselect
+      selectedTop3.splice(existingIndex, 1);
+    } else {
+      // Check if can add more
+      if (selectedTop3.length >= 3) {
+        return; // Max 3 selections
+      }
+      // Check if already selected in last place
+      if (selectedLast && selectedLast.id === racer.id) {
+        return; // Can't select same horse twice
+      }
+      selectedTop3.push(racer);
+    }
+  } else {
+    // Last place selection
+    if (selectedLast && selectedLast.id === racer.id) {
+      // Deselect
+      selectedLast = null;
+    } else {
+      // Check if already in top 3
+      if (selectedTop3.some(s => s.id === racer.id)) {
+        return; // Can't select same horse twice
+      }
+      selectedLast = racer;
+    }
+  }
+  
+  updateCardVisuals();
+  updateConfirmButton();
+}
+
+function updateCardVisuals() {
+  // Update top 3 cards
+  document.querySelectorAll('[data-type="top3"]').forEach(card => {
+    const racerId = card.dataset.racerId;
+    const index = selectedTop3.findIndex(s => s.id === racerId);
+    const badge = card.querySelector('.selection-badge');
+    
+    if (index !== -1) {
+      card.classList.add('selected');
+      badge.textContent = index + 1;
+      badge.style.display = 'flex';
+    } else {
+      card.classList.remove('selected');
+      badge.style.display = 'none';
+    }
+  });
+  
+  // Update last place cards
+  document.querySelectorAll('[data-type="last"]').forEach(card => {
+    const racerId = card.dataset.racerId;
+    const badge = card.querySelector('.selection-badge');
+    
+    if (selectedLast && selectedLast.id === racerId) {
+      card.classList.add('selected-last');
+      badge.textContent = '❌';
+      badge.style.display = 'flex';
+    } else {
+      card.classList.remove('selected-last');
+      badge.style.display = 'none';
+    }
+  });
+}
+
+function updateConfirmButton() {
+  // Enable if at least one selection made
+  confirmBetBtn.disabled = selectedTop3.length === 0 && !selectedLast;
 }
 
 confirmBetBtn.addEventListener('click', () => {
-  if (selectedBet) {
-    socket.emit('place-bet', selectedBet.id);
-    
-    // Display bet
-    betHorseDisplay.innerHTML = `
-      <div class="horse-emoji">🏇</div>
-      <div class="horse-name">${selectedBet.name}</div>
-    `;
-    raceBetDisplay.innerHTML = betHorseDisplay.innerHTML;
-    
-    showScreen(bettingWaitingScreen);
-  }
+  const bets = {
+    top3: selectedTop3.map(s => s.id),
+    last: selectedLast ? selectedLast.id : null
+  };
+  
+  socket.emit('place-bet', bets);
+  
+  // Display bet summary
+  displayBetSummary();
+  showScreen(bettingWaitingScreen);
 });
+
+function displayBetSummary() {
+  let html = '';
+  
+  if (selectedTop3.length > 0) {
+    html += '<div class="bet-summary-section"><strong>Top 3:</strong><br>';
+    selectedTop3.forEach((racer, i) => {
+      html += `${i + 1}. ${racer.name}<br>`;
+    });
+    html += '</div>';
+  }
+  
+  if (selectedLast) {
+    html += `<div class="bet-summary-section"><strong>Last Place:</strong><br>${selectedLast.name}</div>`;
+  }
+  
+  betSummaryDisplay.innerHTML = html;
+  raceBetDisplay.innerHTML = html;
+}
 
 // Tap handling - use touchstart for better mobile response
 let isTapping = false;
