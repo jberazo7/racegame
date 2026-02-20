@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horse Race - Main Display</title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>🏇 Horse Race</h1>
+      <div id="game-status">Waiting for players...</div>
+    </header>
+
+    <div id="qr-section">
+      <div class="qr-container">
+        <h2>Scan to Join!</h2>
+        <div id="qr-code"></div>
+        <p id="mobile-url"></p>
+      </div>
+    </div>
+
+    <div id="race-track">
+      <div id="finish-line"></div>
+      <div id="horses-container"></div>
+    </div>
+
+    <div id="controls">
+      <button id="start-btn" class="btn btn-primary">Start Race</button>
+      <button id="reset-btn" class="btn btn-secondary">Reset Game</button>
+    </div>
+
+    <div id="winner-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>🏆 Winner!</h2>
+        <p id="winner-name"></p>
+        <button id="close-modal-btn" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/scripts/main.js"></script>
+</body>
+</html>
