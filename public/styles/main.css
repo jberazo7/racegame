@@ -33,10 +33,17 @@ header h1 {
   opacity: 0.9;
 }
 
+#lobby-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
 #qr-section {
   display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .qr-container {
@@ -67,12 +74,18 @@ header h1 {
   display: none;
 }
 
+#players-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 #players-list {
   background: white;
   border-radius: 20px;
   padding: 30px;
-  margin-bottom: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  flex: 1;
 }
 
 #players-list h3 {
@@ -165,7 +178,6 @@ header h1 {
   position: relative;
   flex: 1;
   min-height: 40px;
-  max-height: calc((100vh - 300px) / 20);
   margin-bottom: 2px;
 }
 
@@ -195,13 +207,23 @@ header h1 {
   left: 0;
   top: 50%;
   transform: translateY(-50%) scaleX(-1);
-  font-size: 1.8rem;
-  transition: left 0.1s ease-out;
+  transition: left 0.1s ease-out, transform 0.15s ease-out;
   z-index: 5;
   filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
+  transform-origin: center center;
 }
 
-#controls,
+/* Dynamic horse sizing based on number of players */
+.horses-container-small .horse { font-size: 3rem; }
+.horses-container-medium .horse { font-size: 2.2rem; }
+.horses-container-large .horse { font-size: 1.5rem; }
+
+#controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
 #game-controls {
   display: flex;
   justify-content: center;
@@ -273,6 +295,16 @@ header h1 {
   font-size: 2rem;
   margin-bottom: 30px;
   color: #667eea;
+}
+
+@media (max-width: 1024px) {
+  #lobby-content {
+    grid-template-columns: 1fr;
+  }
+  
+  #qr-section {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 768px) {

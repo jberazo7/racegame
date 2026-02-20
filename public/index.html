@@ -14,21 +14,24 @@
         <div id="game-status">Waiting for players...</div>
       </header>
 
-      <div id="qr-section">
-        <div class="qr-container">
-          <h2>Scan to Join!</h2>
-          <div id="qr-code"></div>
-          <p id="mobile-url"></p>
+      <div id="lobby-content">
+        <div id="qr-section">
+          <div class="qr-container">
+            <h2>Scan to Join!</h2>
+            <div id="qr-code"></div>
+            <p id="mobile-url"></p>
+          </div>
         </div>
-      </div>
 
-      <div id="players-list">
-        <h3>Players Ready:</h3>
-        <div id="players-container"></div>
-      </div>
-
-      <div id="controls">
-        <button id="go-to-game-btn" class="btn btn-primary">Go to Game</button>
+        <div id="players-section">
+          <div id="players-list">
+            <h3>Players Ready:</h3>
+            <div id="players-container"></div>
+          </div>
+          <div id="controls">
+            <button id="go-to-game-btn" class="btn btn-primary">Go to Game</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -60,6 +63,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/scripts/confetti.js"></script>
   <script src="/scripts/main.js"></script>
 </body>
 </html>

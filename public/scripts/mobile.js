@@ -25,6 +25,8 @@ const tapCount = document.getElementById('tap-count');
 const resultMessage = document.getElementById('result-message');
 const betResultTitle = document.getElementById('bet-result-title');
 const betResultMessage = document.getElementById('bet-result-message');
+const oddsDisplay = document.getElementById('odds-display');
+const oddsDisplayBetting = document.getElementById('odds-display-betting');
 
 let playerId = null;
 let playerColor = null;
@@ -33,6 +35,7 @@ let playerMode = null; // 'racer' or 'bettor'
 let selectedBet = null;
 let taps = 0;
 let availableRacers = [];
+let currentOdds = [];
 
 // Join game - step 1: enter name
 joinBtn.addEventListener('click', () => {
@@ -97,16 +100,42 @@ socket.on('race-finished', ({ winner }) => {
     resultMessage.textContent = isWinner ? '🏆 You Won!' : `${winner.name} won!`;
     resultMessage.style.color = isWinner ? '#FFD700' : '#fff';
     showScreen(finishedScreen);
+    
+    // Confetti for winner
+    if (isWinner) {
+      createConfetti(document.body);
+    }
   } else {
     // Bettor result
     const wonBet = selectedBet && selectedBet.id === winner.id;
-    betResultTitle.textContent = wonBet ? '🎉 You Won!' : '😔 You Lost';
+    betResultTitle.textContent = wonBet ? '🎉 You Won $100!' : '😔 You Lost';
     betResultTitle.style.color = wonBet ? '#FFD700' : '#fff';
     betResultMessage.textContent = `${winner.name} won the race!`;
     betResultMessage.style.color = wonBet ? '#4CAF50' : '#ff6b6b';
     showScreen(betResultScreen);
+    
+    // Confetti for winning bet
+    if (wonBet) {
+      createConfetti(document.body);
+    }
   }
 });
+
+socket.on('odds-update', (odds) => {
+  currentOdds = odds;
+  updateOddsDisplay();
+});
+
+function updateOddsDisplay() {
+  if (!oddsDisplay && !oddsDisplayBetting) return;
+  
+  const html = currentOdds.map(o => 
+    `<span class="odds-item"><span class="odds-name">${o.name}</span><span class="odds-value">${o.position}%</span></span>`
+  ).join('');
+  
+  if (oddsDisplay) oddsDisplay.innerHTML = html || 'Waiting for race data...';
+  if (oddsDisplayBetting) oddsDisplayBetting.innerHTML = html || 'Waiting for race data...';
+}
 
 socket.on('game-reset', () => {
   taps = 0;
@@ -118,7 +147,18 @@ socket.on('game-reset', () => {
   }
 });
 
-// Betting card selection
+// Betting card selection with horse images
+const horseImages = [
+  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&sat=-100'
+];
+
 function displayBettingCards(racers) {
   bettingCards.innerHTML = '';
   
@@ -127,11 +167,12 @@ function displayBettingCards(racers) {
     return;
   }
   
-  racers.forEach(racer => {
+  racers.forEach((racer, index) => {
     const card = document.createElement('div');
     card.className = 'betting-card';
+    const imageUrl = horseImages[index % horseImages.length];
     card.innerHTML = `
-      <div class="horse-emoji">🏇</div>
+      <div class="horse-image" style="background-image: url('${imageUrl}')"></div>
       <div class="horse-name">${racer.name}</div>
       <div class="horse-rider" style="color: ${racer.color}">●</div>
     `;
@@ -165,17 +206,31 @@ confirmBetBtn.addEventListener('click', () => {
   }
 });
 
-// Tap handling
-tapButton.addEventListener('click', () => {
+// Tap handling - use touchstart for better mobile response
+let isTapping = false;
+
+function handleTap(e) {
+  e.preventDefault();
+  if (isTapping) return;
+  
+  isTapping = true;
   socket.emit('tap');
   taps++;
   tapCount.textContent = `Taps: ${taps}`;
   
   // Visual feedback
-  tapButton.style.transform = 'scale(0.9)';
+  tapButton.style.transform = 'scale(0.92)';
   setTimeout(() => {
     tapButton.style.transform = 'scale(1)';
-  }, 100);
+    isTapping = false;
+  }, 50);
+}
+
+tapButton.addEventListener('touchstart', handleTap, { passive: false });
+tapButton.addEventListener('click', (e) => {
+  if (!isTapping) {
+    handleTap(e);
+  }
 });
 
 // Prevent double-tap zoom on iOS

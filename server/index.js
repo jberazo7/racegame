@@ -104,6 +104,10 @@ io.on('connection', (socket) => {
       player.position += 1;
       io.emit('position-update', { playerId: socket.id, position: player.position });
       
+      // Calculate and broadcast odds
+      const odds = calculateOdds();
+      io.emit('odds-update', odds);
+      
       // Check for winner (finish line at position 100)
       if (player.position >= 100 && gameState === 'racing') {
         gameState = 'finished';
@@ -111,6 +115,21 @@ io.on('connection', (socket) => {
       }
     }
   });
+
+  // Calculate real-time odds based on positions
+  function calculateOdds() {
+    const playerArray = Array.from(players.values());
+    const totalProgress = playerArray.reduce((sum, p) => sum + p.position, 0);
+    
+    if (totalProgress === 0) {
+      return playerArray.map(p => ({ name: p.name, position: 0 }));
+    }
+    
+    return playerArray.map(p => ({
+      name: p.name,
+      position: Math.round((p.position / totalProgress) * 100)
+    })).sort((a, b) => b.position - a.position);
+  }
 
   // Start race
   socket.on('start-race', () => {

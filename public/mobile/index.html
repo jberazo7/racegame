@@ -32,7 +32,7 @@
 
     <div id="betting-screen" class="screen hidden">
       <h1>Place Your Bet</h1>
-      <p class="subtitle">Choose a horse to win!</p>
+      <p class="subtitle">Choose a horse to win! Prize: $100</p>
       <div id="betting-cards"></div>
       <button id="confirm-bet-btn" class="btn btn-primary" disabled>Confirm Bet</button>
     </div>
@@ -56,6 +56,7 @@
     </div>
 
     <div id="racing-screen" class="screen hidden">
+      <div id="odds-display" class="odds-bar"></div>
       <div id="tap-area">
         <div id="tap-button">
           <span>TAP!</span>
@@ -65,6 +66,7 @@
     </div>
 
     <div id="betting-race-screen" class="screen hidden">
+      <div id="odds-display-betting" class="odds-bar"></div>
       <h1>Race in Progress!</h1>
       <div id="bet-status">
         <p class="bet-label">Your bet:</p>
@@ -87,6 +89,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/scripts/confetti.js"></script>
   <script src="/scripts/mobile.js"></script>
 </body>
 </html>

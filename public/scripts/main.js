@@ -60,6 +60,9 @@ socket.on('race-finished', ({ winner }) => {
   winnerNameEl.textContent = winner.name;
   winnerModal.classList.remove('hidden');
   startBtn.disabled = false;
+  
+  // Confetti!
+  createConfetti(document.body);
 });
 
 socket.on('game-reset', () => {
@@ -114,6 +117,16 @@ function updatePlayersDisplay() {
     return;
   }
   
+  // Add size class based on player count
+  horsesContainer.className = '';
+  if (players.length <= 4) {
+    horsesContainer.className = 'horses-container-small';
+  } else if (players.length <= 10) {
+    horsesContainer.className = 'horses-container-medium';
+  } else {
+    horsesContainer.className = 'horses-container-large';
+  }
+  
   players.forEach(player => {
     const lane = document.createElement('div');
     lane.className = 'horse-lane';
@@ -143,6 +156,12 @@ function updateHorsePosition(playerId, position) {
   if (horseEl) {
     const percentage = Math.min(position, 100);
     horseEl.style.left = `${percentage}%`;
+    
+    // Galloping animation - tilt up briefly
+    horseEl.style.transform = 'translateY(-50%) scaleX(-1) rotate(-15deg)';
+    setTimeout(() => {
+      horseEl.style.transform = 'translateY(-50%) scaleX(-1) rotate(0deg)';
+    }, 150);
   }
 }
 

@@ -115,13 +115,16 @@ h1 {
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.05s ease-out, box-shadow 0.05s;
   border: 6px solid white;
+  touch-action: manipulation;
 }
 
 #tap-button:active {
-  transform: scale(0.9);
+  transform: scale(0.92);
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
@@ -133,6 +136,9 @@ h1 {
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 #tap-count {
@@ -224,6 +230,15 @@ h1 {
   box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
 }
 
+.horse-image {
+  width: 100%;
+  height: 100px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
 .horse-emoji {
   font-size: 3rem;
   margin-bottom: 8px;
@@ -286,6 +301,51 @@ h1 {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 20px;
+}
+
+.odds-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  font-size: 0.85rem;
+  z-index: 1000;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.odds-item {
+  display: inline-block;
+  margin-right: 15px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.odds-name {
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.odds-value {
+  color: #FFD700;
+}
+
+#tap-area {
+  margin-top: 50px;
+}
+
+.confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
 }
 
 @media (max-width: 375px) {
