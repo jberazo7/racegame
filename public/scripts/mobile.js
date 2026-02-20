@@ -103,12 +103,12 @@ socket.on('race-finished', ({ winner }) => {
     
     // Confetti for winner
     if (isWinner) {
-      createConfetti(document.body);
+      setTimeout(() => createConfetti(document.body), 100);
     }
   } else {
     // Bettor result
     const wonBet = selectedBet && selectedBet.id === winner.id;
-    betResultTitle.textContent = wonBet ? '🎉 You Won $100!' : '😔 You Lost';
+    betResultTitle.textContent = wonBet ? '🎉 You Won 100,000 Points!' : '😔 You Lost';
     betResultTitle.style.color = wonBet ? '#FFD700' : '#fff';
     betResultMessage.textContent = `${winner.name} won the race!`;
     betResultMessage.style.color = wonBet ? '#4CAF50' : '#ff6b6b';
@@ -116,7 +116,7 @@ socket.on('race-finished', ({ winner }) => {
     
     // Confetti for winning bet
     if (wonBet) {
-      createConfetti(document.body);
+      setTimeout(() => createConfetti(document.body), 100);
     }
   }
 });
@@ -124,17 +124,56 @@ socket.on('race-finished', ({ winner }) => {
 socket.on('odds-update', (odds) => {
   currentOdds = odds;
   updateOddsDisplay();
+  updateBettingCardsOdds();
 });
 
 function updateOddsDisplay() {
   if (!oddsDisplay && !oddsDisplayBetting) return;
   
-  const html = currentOdds.map(o => 
-    `<span class="odds-item"><span class="odds-name">${o.name}</span><span class="odds-value">${o.position}%</span></span>`
-  ).join('');
+  // Create bar visualization
+  const barHtml = `
+    <div class="odds-title">🏁 Live Race Odds</div>
+    <div class="odds-bar-container">
+      ${currentOdds.map(o => 
+        `<div class="odds-segment" style="width: ${o.position}%; background-color: ${o.color}">
+          ${o.position > 10 ? o.position + '%' : ''}
+        </div>`
+      ).join('')}
+    </div>
+    <div class="odds-list">
+      ${currentOdds.map(o => 
+        `<span class="odds-item">
+          <span class="odds-name" style="color: ${o.color}">●</span>
+          <span class="odds-name">${o.name}</span>
+          <span class="odds-value">${o.position}%</span>
+        </span>`
+      ).join('')}
+    </div>
+  `;
   
-  if (oddsDisplay) oddsDisplay.innerHTML = html || 'Waiting for race data...';
-  if (oddsDisplayBetting) oddsDisplayBetting.innerHTML = html || 'Waiting for race data...';
+  if (oddsDisplay) oddsDisplay.innerHTML = barHtml || '<div class="odds-title">Waiting for race data...</div>';
+  if (oddsDisplayBetting) oddsDisplayBetting.innerHTML = barHtml || '<div class="odds-title">Waiting for race data...</div>';
+}
+
+function updateBettingCardsOdds() {
+  if (!currentOdds || currentOdds.length === 0) return;
+  
+  // Update odds on betting cards during race
+  currentOdds.forEach(odds => {
+    const cards = document.querySelectorAll('.betting-card');
+    cards.forEach(card => {
+      const nameEl = card.querySelector('.horse-name');
+      if (nameEl && nameEl.textContent === odds.name) {
+        let oddsEl = card.querySelector('.horse-odds');
+        if (!oddsEl) {
+          oddsEl = document.createElement('div');
+          oddsEl.className = 'horse-odds';
+          nameEl.parentNode.insertBefore(oddsEl, nameEl.nextSibling);
+        }
+        oddsEl.textContent = `${odds.position}% chance`;
+      }
+    });
+  });
 }
 
 socket.on('game-reset', () => {
@@ -153,10 +192,18 @@ const horseImages = [
   'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop',
   'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop',
   'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop',
   'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&sat=-100',
   'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&sat=-100',
   'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&sat=-100'
+  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop&sat=-100',
+  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop&sat=-100'
 ];
 
 function displayBettingCards(racers) {
@@ -174,7 +221,7 @@ function displayBettingCards(racers) {
     card.innerHTML = `
       <div class="horse-image" style="background-image: url('${imageUrl}')"></div>
       <div class="horse-name">${racer.name}</div>
-      <div class="horse-rider" style="color: ${racer.color}">●</div>
+      <div class="horse-color-indicator" style="background-color: ${racer.color}"></div>
     `;
     card.addEventListener('click', () => selectBet(racer, card));
     bettingCards.appendChild(card);

@@ -122,12 +122,13 @@ io.on('connection', (socket) => {
     const totalProgress = playerArray.reduce((sum, p) => sum + p.position, 0);
     
     if (totalProgress === 0) {
-      return playerArray.map(p => ({ name: p.name, position: 0 }));
+      return playerArray.map(p => ({ name: p.name, position: 0, color: p.color }));
     }
     
     return playerArray.map(p => ({
       name: p.name,
-      position: Math.round((p.position / totalProgress) * 100)
+      position: Math.round((p.position / totalProgress) * 100),
+      color: p.color
     })).sort((a, b) => b.position - a.position);
   }
 

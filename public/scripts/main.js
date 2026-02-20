@@ -61,8 +61,8 @@ socket.on('race-finished', ({ winner }) => {
   winnerModal.classList.remove('hidden');
   startBtn.disabled = false;
   
-  // Confetti!
-  createConfetti(document.body);
+  // Confetti with delay to ensure it shows
+  setTimeout(() => createConfetti(document.body), 100);
 });
 
 socket.on('game-reset', () => {

@@ -185,15 +185,18 @@ header h1 {
   min-width: 120px;
   font-weight: 600;
   color: #333;
-  font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Dynamic name sizing based on number of players */
+.horses-container-small .horse-info { font-size: 1.8rem; }
+.horses-container-medium .horse-info { font-size: 1.2rem; }
+.horses-container-large .horse-info { font-size: 0.9rem; }
+
 .horse-track {
   flex: 1;
-  height: 30px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 15px;
   position: relative;
@@ -201,6 +204,11 @@ header h1 {
   overflow: visible;
   border: 2px solid rgba(0,0,0,0.1);
 }
+
+/* Dynamic track sizing based on number of players */
+.horses-container-small .horse-track { height: 50px; }
+.horses-container-medium .horse-track { height: 35px; }
+.horses-container-large .horse-track { height: 25px; }
 
 .horse {
   position: absolute;

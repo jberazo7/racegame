@@ -251,9 +251,24 @@ h1 {
   margin-bottom: 3px;
 }
 
+.horse-odds {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 3px;
+}
+
 .horse-rider {
   font-size: 0.85rem;
   color: #666;
+}
+
+.horse-color-indicator {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 5px auto 0;
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 #confirm-bet-btn:disabled {
@@ -308,21 +323,57 @@ h1 {
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.9);
   color: white;
-  padding: 10px;
+  padding: 15px 10px;
   font-size: 0.85rem;
   z-index: 1000;
-  overflow-x: auto;
-  white-space: nowrap;
+}
+
+.odds-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #FFD700;
+}
+
+.odds-bar-container {
+  width: 100%;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 10px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.odds-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+  transition: width 0.3s ease;
+}
+
+.odds-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .odds-item {
   display: inline-block;
-  margin-right: 15px;
   padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  font-size: 0.8rem;
 }
 
 .odds-name {
@@ -335,7 +386,7 @@ h1 {
 }
 
 #tap-area {
-  margin-top: 50px;
+  margin-top: 180px;
 }
 
 .confetti-canvas {
