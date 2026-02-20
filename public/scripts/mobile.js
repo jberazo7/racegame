@@ -211,22 +211,26 @@ socket.on('game-reset', () => {
 
 // Betting card selection with horse images
 const horseImages = [
-  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop&sat=-100',
-  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop&sat=-100'
+  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop&q=80&sat=-100',
+  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&q=80&hue=30',
+  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&q=80&hue=30',
+  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&q=80&hue=30',
+  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&q=80&hue=30'
 ];
 
 function displayBettingCards(racers) {
@@ -258,7 +262,9 @@ function createBettingCard(racer, index, type) {
   
   card.innerHTML = `
     <div class="selection-badge"></div>
-    <div class="horse-image" style="background-image: url('${imageUrl}')"></div>
+    <div class="horse-image" style="background-image: url('${imageUrl}')">
+      <div class="horse-emoji-fallback">🏇</div>
+    </div>
     <div class="horse-name">${racer.name}</div>
     <div class="horse-color-indicator" style="background-color: ${racer.color}"></div>
   `;
