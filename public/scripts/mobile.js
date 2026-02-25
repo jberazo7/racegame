@@ -127,8 +127,24 @@ socket.on('race-started', () => {
 socket.on('race-finished', ({ winner, results, betResults }) => {
   if (playerMode === 'racer') {
     const isWinner = winner.id === playerId;
-    resultMessage.textContent = isWinner ? '🏆 You Won!' : `${winner.name} won!`;
-    resultMessage.style.color = isWinner ? '#FFD700' : '#fff';
+    
+    if (isWinner) {
+      // Show winner's horse photo
+      const winnerIndex = availableRacers.findIndex(r => r.id === playerId);
+      const winnerImageUrl = horseImages[winnerIndex % horseImages.length];
+      
+      resultMessage.innerHTML = `
+        <div style="width: 120px; height: 120px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 4px solid #FFD700;">
+          <img src="${winnerImageUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Winner">
+        </div>
+        <div style="font-size: 2rem; font-weight: 700;">🏆 You Won!</div>
+      `;
+      resultMessage.style.color = '#FFD700';
+    } else {
+      resultMessage.textContent = `${winner.name} won!`;
+      resultMessage.style.color = '#fff';
+    }
+    
     showScreen(finishedScreen);
     
     // Confetti for winner
@@ -276,7 +292,6 @@ socket.on('game-reset', () => {
 
 // Betting card selection with horse images
 const horseImages = [
-  '/images/horses/horse1.jpg',
   '/images/horses/horse-2.jpg',
   '/images/horses/horse-3.jpg',
   '/images/horses/horse-4.jpg',
@@ -289,7 +304,14 @@ const horseImages = [
   '/images/horses/horse-11.jpg',
   '/images/horses/horse-12.jpg',
   '/images/horses/horse-13.jpg',
-  '/images/horses/horse-14.jpg'
+  '/images/horses/horse-14.jpg',
+  '/images/horses/horse-2.jpg',
+  '/images/horses/horse-3.jpg',
+  '/images/horses/horse-4.jpg',
+  '/images/horses/horse-5.jpg',
+  '/images/horses/horse-6.jpg',
+  '/images/horses/horse-7.jpg',
+  '/images/horses/horse-8.jpg'
 ];
 
 function displayBettingCards(racers) {
@@ -300,6 +322,9 @@ function displayBettingCards(racers) {
     bettingCardsTop3.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No racers yet. Wait for players to join as racers!</p>';
     return;
   }
+  
+  // Store racers for later use
+  availableRacers = racers;
   
   racers.forEach((racer, index) => {
     // Top 3 cards

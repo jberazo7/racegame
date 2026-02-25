@@ -78,8 +78,19 @@ socket.on('all-bets-confirmed', () => {
 socket.on('race-finished', ({ winner, results, betResults }) => {
   raceStatusEl.textContent = `Race finished! Winner: ${winner.name} 🏆`;
   
-  // Show final order
-  let resultsHtml = `<h2>🏆 ${winner.name}</h2><br><strong>Final Order:</strong><br>`;
+  // Get winner's horse image
+  const winnerIndex = Array.from(players.values()).findIndex(p => p.id === winner.id);
+  const winnerImageUrl = `/images/horses/horse-${(winnerIndex % 13) + 2}.jpg`;
+  
+  // Show final order with winner's photo
+  let resultsHtml = `
+    <div style="margin-bottom: 20px;">
+      <div style="width: 150px; height: 150px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 5px solid #FFD700; box-shadow: 0 5px 20px rgba(255,215,0,0.5);">
+        <img src="${winnerImageUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="${winner.name}">
+      </div>
+      <h2 style="color: #FFD700;">🏆 ${winner.name}</h2>
+    </div>
+    <br><strong>Final Order:</strong><br>`;
   results.forEach((r, i) => {
     resultsHtml += `${i + 1}. ${r.name}<br>`;
   });
