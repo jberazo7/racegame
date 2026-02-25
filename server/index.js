@@ -234,6 +234,7 @@ io.on('connection', (socket) => {
 
   // Start race
   socket.on('start-race', () => {
+    console.log(`Start race requested. Current state: ${gameState}, Players: ${players.size}`);
     if ((gameState === 'waiting' || gameState === 'racersLocked') && players.size > 0) {
       gameState = 'racing';
       raceStartTime = Date.now();
@@ -249,6 +250,8 @@ io.on('connection', (socket) => {
         io.emit('race-started');
         console.log('Race started!');
       }, 3000);
+    } else {
+      console.log(`Cannot start race. State: ${gameState}, Players: ${players.size}`);
     }
   });
 

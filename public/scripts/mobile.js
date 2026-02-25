@@ -123,6 +123,11 @@ socket.on('countdown-start', () => {
       } else {
         countdownText.textContent = 'GO!';
         countdownText.style.color = '#4CAF50';
+        // Restart animation for GO!
+        countdownText.style.animation = 'none';
+        setTimeout(() => {
+          countdownText.style.animation = 'countdownPulse 1s ease-in-out';
+        }, 10);
         setTimeout(() => {
           overlay.remove();
           tapButton.style.pointerEvents = 'auto';

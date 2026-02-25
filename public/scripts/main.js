@@ -78,6 +78,11 @@ socket.on('countdown-start', () => {
     } else {
       countdownText.textContent = 'GO!';
       countdownText.style.color = '#4CAF50';
+      // Restart animation for GO!
+      countdownText.style.animation = 'none';
+      setTimeout(() => {
+        countdownText.style.animation = 'countdownPulse 1s ease-in-out';
+      }, 10);
       setTimeout(() => {
         overlay.remove();
       }, 1000);
@@ -100,7 +105,7 @@ socket.on('race-finished', ({ winner, results, betResults }) => {
   raceStatusEl.textContent = `Race finished! Winner: ${winner.name} 🏆`;
   
   // Get winner's horse image
-  const winnerIndex = Array.from(players.values()).findIndex(p => p.id === winner.id);
+  const winnerIndex = players.findIndex(p => p.id === winner.id);
   const winnerImageUrl = `/images/horses/horse-${(winnerIndex % 13) + 2}.jpg`;
   
   // Show final order with winner's photo
@@ -259,6 +264,10 @@ goToGameBtn.addEventListener('click', () => {
   gameScreen.classList.remove('hidden');
   updatePlayersDisplay();
   
+  // Ensure start button is enabled
+  startBtn.disabled = false;
+  raceStatusEl.textContent = 'Ready to race!';
+  
   // Lock racers
   socket.emit('lock-racers');
 });
@@ -267,6 +276,9 @@ backToLobbyBtn.addEventListener('click', () => {
   currentScreen = 'lobby';
   gameScreen.classList.add('hidden');
   lobbyScreen.classList.remove('hidden');
+  
+  // Reset game state on server
+  socket.emit('reset-game');
 });
 
 startBtn.addEventListener('click', () => {
