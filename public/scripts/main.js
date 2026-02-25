@@ -54,12 +54,33 @@ socket.on('countdown-start', () => {
   raceStatusEl.textContent = 'Get ready...';
   startBtn.disabled = true;
   
+  // Create countdown overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'countdown-overlay';
+  overlay.id = 'countdown-overlay';
+  const countdownText = document.createElement('div');
+  countdownText.className = 'countdown-text';
+  overlay.appendChild(countdownText);
+  document.body.appendChild(overlay);
+  
   let count = 3;
+  countdownText.textContent = count;
+  
   const countdownInterval = setInterval(() => {
-    raceStatusEl.textContent = count > 0 ? count : 'GO! 🏁';
     count--;
-    
-    if (count < 0) {
+    if (count > 0) {
+      countdownText.textContent = count;
+      // Restart animation
+      countdownText.style.animation = 'none';
+      setTimeout(() => {
+        countdownText.style.animation = 'countdownPulse 1s ease-in-out';
+      }, 10);
+    } else {
+      countdownText.textContent = 'GO!';
+      countdownText.style.color = '#4CAF50';
+      setTimeout(() => {
+        overlay.remove();
+      }, 1000);
       clearInterval(countdownInterval);
     }
   }, 1000);
