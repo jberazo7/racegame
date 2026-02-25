@@ -71,17 +71,21 @@ socket.on('joined', ({ playerId: id, color, mode }) => {
   playerId = id;
   playerColor = color;
   
+  console.log('Joined as:', mode);
+  
   if (mode === 'racer') {
     playerColorIndicator.style.backgroundColor = color;
     playerNameDisplay.textContent = playerName;
     showScreen(waitingScreen);
   } else {
     // Bettor - show waiting screen until racers locked
+    console.log('Showing betting waiting screen');
     showScreen(bettingWaitingScreen);
   }
 });
 
 socket.on('racers-locked', (racers) => {
+  console.log('Racers locked, received:', racers.length, 'racers');
   if (playerMode === 'bettor') {
     availableRacers = racers;
     displayBettingCards(racers);

@@ -80,7 +80,9 @@ io.on('connection', (socket) => {
       io.emit('bettors-update', Array.from(bettors.values()));
       
       // If racers already locked, send them immediately
+      console.log(`Bettor joined. Current gameState: ${gameState}`);
       if (gameState === 'racersLocked' || gameState === 'racing') {
+        console.log(`Sending locked racers to ${name}`);
         socket.emit('racers-locked', Array.from(players.values()));
       }
       
