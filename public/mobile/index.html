@@ -33,7 +33,7 @@
 
     <div id="betting-screen" class="screen hidden">
       <h1>Place Your Bets</h1>
-      <p class="subtitle">Pick the top 3 finishers in order and/or who finishes last!</p>
+      <p class="subtitle">Pick the top 3 finishers in order and/or who finishes last</p>
       <p class="betting-instructions">Tap cards to select. Tap again to deselect. Prize pool: 100,000 points</p>
       
       <div class="betting-section">
@@ -52,28 +52,34 @@
     </div>
 
     <div id="waiting-screen" class="screen hidden">
-      <h1>Ready to Race!</h1>
-      <div id="player-info">
-        <div id="player-color-indicator"></div>
-        <p id="player-name-display"></p>
+      <div class="centered-content">
+        <h1>Ready to Race!</h1>
+        <div id="player-info">
+          <div id="player-color-indicator"></div>
+          <p id="player-name-display"></p>
+        </div>
+        <div class="loading-spinner"></div>
+        <p class="status">Waiting for race to start</p>
       </div>
-      <p class="status">Waiting for race to start...</p>
     </div>
 
     <div id="betting-waiting-screen" class="screen hidden">
-      <h1>Waiting for Racers...</h1>
-      <div id="bet-info">
-        <p class="status">Host is locking in the racer lineup. Please wait...</p>
+      <div class="centered-content">
+        <div class="loading-spinner"></div>
+        <h1>Waiting for Racers</h1>
+        <p class="status">Host is locking in the racer lineup. Please wait</p>
       </div>
     </div>
 
     <div id="betting-ready-screen" class="screen hidden">
-      <h1>Bets Placed!</h1>
-      <div id="bet-info">
-        <p class="bet-label">Your predictions:</p>
-        <div id="bet-summary-display"></div>
+      <div class="centered-content">
+        <h1>Bets Placed!</h1>
+        <div id="bet-info">
+          <p class="bet-label">Your predictions:</p>
+          <div id="bet-summary-display"></div>
+        </div>
+        <p class="status">Waiting for race to start</p>
       </div>
-      <p class="status">Waiting for race to start...</p>
     </div>
 
     <div id="racing-screen" class="screen hidden">
@@ -94,14 +100,16 @@
           <p class="bet-label">Your predictions:</p>
           <div id="race-bet-display"></div>
         </div>
-        <p class="status">Watch the main screen!</p>
+        <p class="status">Watch the main screen</p>
       </div>
     </div>
 
     <div id="finished-screen" class="screen hidden">
-      <h1>Race Finished!</h1>
-      <p id="result-message"></p>
-      <p class="status">Waiting for next race...</p>
+      <div class="centered-content">
+        <h1>Race Finished!</h1>
+        <p id="result-message"></p>
+        <p class="status">Waiting for next race</p>
+      </div>
     </div>
 
     <div id="bet-result-screen" class="screen hidden">
