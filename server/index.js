@@ -29,7 +29,7 @@ const HOST = process.env.HOST || getLocalIP();
 // Game state
 const players = new Map();
 const bettors = new Map();
-let gameState = 'waiting'; // waiting, racing, finished
+let gameState = 'waiting'; // waiting, racersLocked, racing, finished
 let raceStartTime = null;
 
 app.use(express.static(path.join(__dirname, '../public')));
@@ -71,12 +71,19 @@ io.on('connection', (socket) => {
         id: socket.id,
         name: name,
         mode: 'bettor',
-        bet: null
+        bets: null,
+        confirmed: false
       };
       bettors.set(socket.id, bettor);
       
       socket.emit('joined', { playerId: socket.id, mode: 'bettor' });
       io.emit('bettors-update', Array.from(bettors.values()));
+      
+      // If racers already locked, send them immediately
+      if (gameState === 'racersLocked' || gameState === 'racing') {
+        socket.emit('racers-locked', Array.from(players.values()));
+      }
+      
       console.log(`Bettor joined: ${name}`);
     }
   });
@@ -91,7 +98,14 @@ io.on('connection', (socket) => {
     const bettor = bettors.get(socket.id);
     if (bettor) {
       bettor.bets = bets; // { top3: [id1, id2, id3], last: id }
+      bettor.confirmed = true;
       console.log(`${bettor.name} placed bets:`, bets);
+      
+      // Check if all bettors confirmed
+      const allConfirmed = Array.from(bettors.values()).every(b => b.confirmed);
+      if (allConfirmed && bettors.size > 0) {
+        io.emit('all-bets-confirmed');
+      }
     }
   });
 
@@ -218,22 +232,43 @@ io.on('connection', (socket) => {
 
   // Start race
   socket.on('start-race', () => {
-    if (gameState === 'waiting' && players.size > 0) {
+    if ((gameState === 'waiting' || gameState === 'racersLocked') && players.size > 0) {
       gameState = 'racing';
       raceStartTime = Date.now();
       
       // Reset all positions
       players.forEach(player => player.position = 0);
       
-      io.emit('race-started');
-      console.log('Race started!');
+      // Start countdown
+      io.emit('countdown-start');
+      
+      // Start race after countdown (3 seconds)
+      setTimeout(() => {
+        io.emit('race-started');
+        console.log('Race started!');
+      }, 3000);
+    }
+  });
+
+  // Lock racers (when host goes to game view)
+  socket.on('lock-racers', () => {
+    if (gameState === 'waiting') {
+      gameState = 'racersLocked';
+      io.emit('racers-locked', Array.from(players.values()));
+      console.log('Racers locked!');
     }
   });
 
   // Reset game
   socket.on('reset-game', () => {
     gameState = 'waiting';
-    players.forEach(player => player.position = 0);
+    players.forEach(player => {
+      player.position = 0;
+    });
+    bettors.forEach(bettor => {
+      bettor.bets = null;
+      bettor.confirmed = false;
+    });
     io.emit('game-reset');
     io.emit('players-update', Array.from(players.values()));
     console.log('Game reset');
@@ -259,7 +294,10 @@ function generateColor(index) {
   const colors = [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', 
     '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2',
-    '#F8B739', '#52B788', '#E63946', '#457B9D'
+    '#F8B739', '#52B788', '#E63946', '#457B9D',
+    '#FF8C42', '#6A4C93', '#1982C4', '#8AC926',
+    '#FF595E', '#FFCA3A', '#8AC926', '#1982C4',
+    '#6A4C93', '#C9ADA7', '#9A8C98', '#4A4E69'
   ];
   return colors[index % colors.length];
 }

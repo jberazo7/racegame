@@ -50,9 +50,29 @@ socket.on('position-update', ({ playerId, position }) => {
   }
 });
 
+socket.on('countdown-start', () => {
+  raceStatusEl.textContent = 'Get ready...';
+  startBtn.disabled = true;
+  
+  let count = 3;
+  const countdownInterval = setInterval(() => {
+    raceStatusEl.textContent = count > 0 ? count : 'GO! 🏁';
+    count--;
+    
+    if (count < 0) {
+      clearInterval(countdownInterval);
+    }
+  }, 1000);
+});
+
 socket.on('race-started', () => {
   raceStatusEl.textContent = 'Race in progress! 🏁';
-  startBtn.disabled = true;
+});
+
+socket.on('all-bets-confirmed', () => {
+  if (currentScreen === 'game') {
+    raceStatusEl.textContent = '✅ All bettors confirmed! Ready to start.';
+  }
 });
 
 socket.on('race-finished', ({ winner, results, betResults }) => {
@@ -206,6 +226,9 @@ goToGameBtn.addEventListener('click', () => {
   lobbyScreen.classList.add('hidden');
   gameScreen.classList.remove('hidden');
   updatePlayersDisplay();
+  
+  // Lock racers
+  socket.emit('lock-racers');
 });
 
 backToLobbyBtn.addEventListener('click', () => {

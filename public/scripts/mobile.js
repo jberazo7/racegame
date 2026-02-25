@@ -5,6 +5,7 @@ const modeSelectionScreen = document.getElementById('mode-selection-screen');
 const bettingScreen = document.getElementById('betting-screen');
 const waitingScreen = document.getElementById('waiting-screen');
 const bettingWaitingScreen = document.getElementById('betting-waiting-screen');
+const bettingReadyScreen = document.getElementById('betting-ready-screen');
 const racingScreen = document.getElementById('racing-screen');
 const bettingRaceScreen = document.getElementById('betting-race-screen');
 const finishedScreen = document.getElementById('finished-screen');
@@ -75,24 +76,47 @@ socket.on('joined', ({ playerId: id, color, mode }) => {
     playerNameDisplay.textContent = playerName;
     showScreen(waitingScreen);
   } else {
-    // Bettor - request available racers
-    socket.emit('get-racers');
+    // Bettor - show waiting screen until racers locked
+    showScreen(bettingWaitingScreen);
   }
 });
 
-socket.on('racers-list', (racers) => {
-  availableRacers = racers;
-  displayBettingCards(racers);
-  showScreen(bettingScreen);
+socket.on('racers-locked', (racers) => {
+  if (playerMode === 'bettor') {
+    availableRacers = racers;
+    displayBettingCards(racers);
+    showScreen(bettingScreen);
+  }
+});
+
+socket.on('countdown-start', () => {
+  // Show countdown on mobile
+  if (playerMode === 'racer') {
+    showScreen(racingScreen);
+    tapCount.textContent = 'Get ready...';
+    tapButton.style.pointerEvents = 'none';
+    
+    let count = 3;
+    const countdownInterval = setInterval(() => {
+      tapCount.textContent = count > 0 ? count : 'GO!';
+      count--;
+      
+      if (count < 0) {
+        clearInterval(countdownInterval);
+        tapButton.style.pointerEvents = 'auto';
+        taps = 0;
+        tapCount.textContent = 'Taps: 0';
+      }
+    }, 1000);
+  } else {
+    showScreen(bettingRaceScreen);
+  }
 });
 
 socket.on('race-started', () => {
+  // Race actually started after countdown
   if (playerMode === 'racer') {
-    taps = 0;
-    tapCount.textContent = 'Taps: 0';
-    showScreen(racingScreen);
-  } else {
-    showScreen(bettingRaceScreen);
+    tapButton.style.pointerEvents = 'auto';
   }
 });
 
@@ -108,8 +132,9 @@ socket.on('race-finished', ({ winner, results, betResults }) => {
       setTimeout(() => createConfetti(document.body), 100);
     }
   } else {
-    // Bettor result
+    // Bettor result with comparison table
     const myResult = betResults.find(r => r.bettorId === playerId);
+    const myBets = Array.from(bettors.values()).find(b => b.id === playerId)?.bets;
     
     if (myResult && myResult.totalPoints > 0) {
       betResultTitle.textContent = `🎉 You Won ${myResult.totalPoints.toLocaleString()} Points!`;
@@ -124,14 +149,19 @@ socket.on('race-finished', ({ winner, results, betResults }) => {
       }
       breakdown += '</div>';
       
-      betResultMessage.innerHTML = `${breakdown}<br>Final Order:<br>${formatResults(results)}`;
+      // Comparison table
+      const comparisonTable = createComparisonTable(myBets, results);
+      
+      betResultMessage.innerHTML = `${breakdown}${comparisonTable}`;
       betResultMessage.style.color = '#4CAF50';
       
       setTimeout(() => createConfetti(document.body), 100);
     } else {
       betResultTitle.textContent = '😔 No Correct Predictions';
       betResultTitle.style.color = '#fff';
-      betResultMessage.innerHTML = `Final Order:<br>${formatResults(results)}`;
+      
+      const comparisonTable = createComparisonTable(myBets, results);
+      betResultMessage.innerHTML = comparisonTable;
       betResultMessage.style.color = '#ff6b6b';
     }
     
@@ -139,8 +169,39 @@ socket.on('race-finished', ({ winner, results, betResults }) => {
   }
 });
 
-function formatResults(results) {
-  return results.map((r, i) => `${i + 1}. ${r.name}`).join('<br>');
+function createComparisonTable(myBets, results) {
+  if (!myBets) return '';
+  
+  const myTop3 = myBets.top3 || [];
+  const myLast = myBets.last;
+  
+  // Get names from IDs
+  const getNameById = (id) => {
+    const racer = availableRacers.find(r => r.id === id);
+    return racer ? racer.name : 'Unknown';
+  };
+  
+  let table = '<div class="comparison-table">';
+  table += '<table><tr><th>Position</th><th>Your Pick</th><th>Actual</th></tr>';
+  
+  // Top 3
+  for (let i = 0; i < 3; i++) {
+    const yourPick = myTop3[i] ? getNameById(myTop3[i]) : '-';
+    const actual = results[i] ? results[i].name : '-';
+    const isCorrect = myTop3[i] === results[i]?.id;
+    const rowClass = isCorrect ? 'correct-row' : '';
+    table += `<tr class="${rowClass}"><td>${i + 1}${i === 0 ? 'st' : i === 1 ? 'nd' : 'rd'}</td><td>${yourPick}</td><td>${actual}</td></tr>`;
+  }
+  
+  // Last place
+  const yourLastPick = myLast ? getNameById(myLast) : '-';
+  const actualLast = results[results.length - 1]?.name || '-';
+  const isLastCorrect = myLast === results[results.length - 1]?.id;
+  const lastRowClass = isLastCorrect ? 'correct-row' : '';
+  table += `<tr class="${lastRowClass}"><td>Last</td><td>${yourLastPick}</td><td>${actualLast}</td></tr>`;
+  
+  table += '</table></div>';
+  return table;
 }
 
 socket.on('odds-update', (odds) => {
@@ -205,32 +266,26 @@ socket.on('game-reset', () => {
   if (playerMode === 'racer') {
     showScreen(waitingScreen);
   } else {
-    socket.emit('get-racers');
+    showScreen(bettingWaitingScreen);
   }
 });
 
 // Betting card selection with horse images
 const horseImages = [
-  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=400&h=300&fit=crop&q=80&sat=-100',
-  'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&h=300&fit=crop&q=80&hue=30',
-  'https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=400&h=300&fit=crop&q=80&hue=30',
-  'https://images.unsplash.com/photo-1598632640487-6ea4a4e8b963?w=400&h=300&fit=crop&q=80&hue=30',
-  'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=300&fit=crop&q=80&hue=30'
+  '/images/horses/horse1.jpg',
+  '/images/horses/horse-2.jpg',
+  '/images/horses/horse-3.jpg',
+  '/images/horses/horse-4.jpg',
+  '/images/horses/horse-5.jpg',
+  '/images/horses/horse-6.jpg',
+  '/images/horses/horse-7.jpg',
+  '/images/horses/horse-8.jpg',
+  '/images/horses/horse-9.jpg',
+  '/images/horses/horse-10.jpg',
+  '/images/horses/horse-11.jpg',
+  '/images/horses/horse-12.jpg',
+  '/images/horses/horse-13.jpg',
+  '/images/horses/horse-14.jpg'
 ];
 
 function displayBettingCards(racers) {
@@ -358,7 +413,7 @@ confirmBetBtn.addEventListener('click', () => {
   
   // Display bet summary
   displayBetSummary();
-  showScreen(bettingWaitingScreen);
+  showScreen(bettingReadyScreen);
 });
 
 function displayBetSummary() {
@@ -420,7 +475,7 @@ document.addEventListener('touchend', (e) => {
 // Helper function
 function showScreen(screen) {
   [joinScreen, modeSelectionScreen, bettingScreen, waitingScreen, 
-   bettingWaitingScreen, racingScreen, bettingRaceScreen, 
+   bettingWaitingScreen, bettingReadyScreen, racingScreen, bettingRaceScreen, 
    finishedScreen, betResultScreen].forEach(s => {
     s.classList.add('hidden');
   });
